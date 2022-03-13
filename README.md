@@ -1,6 +1,6 @@
 # SimpleWebsocketChat
 This is a simple multi client chat web app.
-
+The server is from: https://github.com/Kkordics/Simple-WebsocketServer
 ## Features
  - It can handle multiple clients
  - Modern design (html)
