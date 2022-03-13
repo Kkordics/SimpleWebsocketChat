@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="hu-hu">
+    <head>
+        <meta charset="utf-8">
+        <style>
+            #MessageA
+            {
+                word-wrap: break-word;
+                max-width: 50%; 
+                border-color: #ecf0f1; 
+                background-color: #ecf0f1; 
+                border-style: inherit; 
+                border-radius: 15px;
+                
+            }
+            #MessageB
+            {
+                word-wrap: break-word;
+                max-width: 50%; 
+                
+                margin-left: auto;
+                border-color: #ecf0f1; 
+                background-color: #ecf0f1; 
+                border-style: inherit; 
+                border-radius: 15px;
+                
+            }
+            #name
+            {
+                font-weight: bold;
+                padding-top: 10px;
+                margin-bottom: 0px;
+                margin-left: 10px;
+            }
+            #msg
+            {
+                margin-top: 0px; 
+                margin-left: 20px;
+                padding-bottom: 10px;
+            }
+            #input
+            {
+               
+                
+                background: none;
+                
+                outline: none;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+
+
+                height: 20px;
+                width: 90%;
+                border: #95a5a6;
+                border-radius: 5px;
+                border-width: 1px;
+                border-style: solid;
+                
+                font-size:medium;
+                height: 30px;
+                margin-left: 20px;
+                margin-top: 10px;
+                margin-bottom: auto;
+                
+            }
+            
+            #write
+            { 
+                border-color: white;
+                border-top: #95a5a6;
+                border-width: 1px;
+                
+                border-style: solid;
+                height: 9%;
+                margin-bottom: 0px;
+            }
+            #status
+            {
+                margin-top: 0px;
+                text-align: center;
+                color: #95a5a6;
+            }
+            button
+            {
+                
+                background: none;
+                border: none;
+                border-radius: 0;
+                outline: none;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+                font-weight: bold;
+                color: white;
+                height: 30px;
+                border-color: #2980b9;
+                border-style: solid;
+                border-radius: 5px;
+                background-color: #3498db;
+
+            }
+            button:hover
+            {
+                background-color: #2980b9;
+                cursor: pointer;
+            }
+            button:active
+            {
+                box-shadow: 0 0 10px #2980b9
+            }
+            #time
+            {
+                text-align: center;
+                margin-top: 0;
+                margin-bottom: 0;
+                font-size: small;
+                color: #95a5a6;
+            }
+            
+            html, body { height: 100%; width: 100%; margin: 0; }
+        </style>
+    </head>
+    <body>
+        
+        <div id="chat" style="height: 90%; overflow-y: scroll; border-color: gray; background-color: white; ">
+        
+        </div>
+        <div id="write">
+            <input id="input" onkeydown="send(this)" placeholder="Write some text" type="text">
+            <button onclick="send2()">Send</button>
+            <p id="status">Offline</p>
+        </div>
+        
+        <script>
+            var url = "ws://192.168.1.100:8080";
+            var websocket = new WebSocket(url);
+
+            function send()
+            {
+                if(event.key === 'Enter' &&document.getElementById("input").value!="") {
+                    
+                    
+                    websocket.send(document.getElementById("input").value);
+
+                    document.getElementById("chat").innerHTML += "<p id='time'>"+formatDate()+"</p>";
+                    document.getElementById("chat").innerHTML += "<div id='MessageB'><p id='name'>You</p><p id='msg'>"+ document.getElementById("input").value +"</p></div>";  
+                    document.getElementById("input").value = "";
+                    scroll();   
+                }
+            };
+            function send2()
+            {
+                if(document.getElementById("input").value!="")
+                {
+                    websocket.send(document.getElementById("input").value);
+                    document.getElementById("chat").innerHTML += "<p id='time'>"+formatDate()+"</p>";
+                    document.getElementById("chat").innerHTML += "<div id='MessageB'><p id='name'>You</p><p id='msg'>"+ document.getElementById("input").value +"</p></div>";  
+                    document.getElementById("input").value = "";   
+                    scroll();
+                }
+                
+            };
+            function formatDate() {
+                var time = new Date;
+                return time.getHours()+":"+time.getMinutes()+":"+time.getSeconds();
+                }
+            websocket.onmessage = function(e)
+            {
+                document.getElementById("chat").innerHTML += "<p id='time'>"+formatDate()+"</p>";
+                var msg = e.data;
+                
+                var name = msg.split(":")[0];
+                var msg = msg.split(":")[1];
+                
+                document.getElementById("chat").innerHTML +="<div id='MessageA' ><p id='name'>"+name+"</p><p id='msg'>"+msg+"</p></div>";
+                
+                scroll();
+            };
+            function reconnect()
+            {
+                if(websocket.readyState !=1)
+                {
+                    websocket = new WebSocket(url);
+                }
+            }
+            
+            window.onclick = function()
+            {
+                reconnect();
+            };
+
+            setInterval(stat, 1000);
+            //setInterval(scroll, 250);
+            function scroll()
+            {
+                document.getElementById("chat").scrollBy(0,1000);
+            };
+
+            function stat()
+            {
+                
+                if(websocket.readyState == 1)
+                {
+                    document.getElementById("status").innerText = "Online..."
+
+                    
+
+                }else
+                {
+                    document.getElementById("status").innerText = "Offline";
+                    
+                }
+            };
+
+        </script>
+    </body>
+</html>
